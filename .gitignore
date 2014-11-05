@@ -12,4 +12,9 @@ custom.el
 site-lisp/
 /bookmarks.bmk
 \177
+*#*#
+commit.txt
+.places
+elpa/*/*autoloads.el
+elpa/archives
 /places

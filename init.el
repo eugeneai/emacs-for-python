@@ -1,19 +1,25 @@
-(add-to-list 'load-path (expand-file-name "~/.emacs.d"))
-
 (setq windowed-system (or (eq window-system 'x) (eq window-system 'w32)))
 (setq win32-system (eq window-system 'w32))
 
+(menu-bar-mode 0)
+(setq inhibit-startup-message t)
+
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/lisp"))
+(add-to-list 'load-path (expand-file-name "~/.emacs.d/epy"))
+
 ;; magnars cool setup
 ;; Set path to .emacs.d
-(setq dotfiles-dir (file-name-directory
-                    (or (buffer-file-name) load-file-name)))
+;;(setq dotfiles-dir (file-name-directory
+;;      (or (buffer-file-name) load-file-name)))
+(setq dotfiles-dir (expand-file-name "~/.emacs.d/"))
+
 
 ;; Set path to dependencies
 (setq site-lisp-dir (expand-file-name "site-lisp" dotfiles-dir))
-(setq ext-lisp-dir (expand-file-name "extensions" dotfiles-dir))
+(setq ext-lisp-dir (expand-file-name "epy/extensions" dotfiles-dir))
 
 ;; Set up load path
-(add-to-list 'load-path dotfiles-dir)
+;;(add-to-list 'load-path dotfiles-dir)
 (add-to-list 'load-path site-lisp-dir)
 
 ;; Settings for currently logged in user
@@ -31,23 +37,27 @@
 
 (add-to-list 'load-path ".")
 
-
 ;; Keep emacs Custom-settings in separate file
 (if windowed-system
-    (if win32-system
+    (progn
+      (tool-bar-mode 0)
+      (scroll-bar-mode 0)
+      (if win32-system
+          (progn
+            (setq custom-file (expand-file-name "custom-w32.el" dotfiles-dir))
+            )
         (progn
-          (setq custom-file (expand-file-name "custom-w32.el" dotfiles-dir))
+          (setq custom-file (expand-file-name "custom.el" dotfiles-dir))
           )
-      (progn
-        (setq custom-file (expand-file-name "custom.el" dotfiles-dir))
         )
       )
   (setq custom-file (expand-file-name "custom-nw.el" dotfiles-dir))
-)
+  )
 
 ;; Write backup files to own directory
 (setq backup-directory-alist `(("." . ,(expand-file-name
                                         (concat dotfiles-dir "backups")))))
+
 (require 'auto-complete)
 
 (require 'linum)
@@ -66,7 +76,7 @@
     (setenv "PYMACS_PYTHON" "python2")
 )
 
-(load-file (expand-file-name "epy-init.el" dotfiles-dir))
+(load-file (expand-file-name "epy/epy-init.el" dotfiles-dir))
 
 (if
     windowed-system
@@ -114,40 +124,32 @@
 ;;(require 'tabbar)
 ;;(tabbar-mode)
 
-(menu-bar-mode 0)
-(tool-bar-mode 0)
-(scroll-bar-mode 0)
+
+(require 'recentf)
+(setq recentf-auto-cleanup 'never) ;; disable before we start recentf!
+(recentf-mode 1)
+(setq
+;;  recentf-menu-path '("File")
+;;  recentf-menu-title "Recent"
+  recentf-max-saved-items 200
+;;  recentf-max-menu-items 20
+  )
+(global-set-key "\C-x\ \C-r" 'recentf-open-files)
+(recentf-update-menu-hook)
+
 (if
     windowed-system
     (progn
       ;(require 'tabbar)
       ;(tabbar-mode)
-      (menu-bar-mode 0)
+      ;(menu-bar-mode 0)
       (set-fringe-style '(0 . 0)) ; no fringes atall
-      (if (not nil)
-          (progn
-            (require 'recentf)
-            (setq recentf-auto-cleanup 'never) ;; disable before we start recentf!
-            (recentf-mode 1)
-            (setq
-             recentf-menu-path '("File")
-             recentf-menu-title "Recent"
-             recentf-max-saved-items 100
-             recentf-max-menu-items 20
-             )
-            (setq recentf-max-menu-items 25)
-            (global-set-key "\C-x\ \C-r" 'recentf-open-files)
-            (recentf-update-menu-hook)
-            )
-      )
+      (mouse-wheel-mode t)
       (setq window-numbering-assign-func
             (lambda () (when (equal (buffer-name) "*Calculator*") 9)))
       (global-font-lock-mode t)
       (setq font-lock-maximum-decoration t)
       )
-  (progn
-      (menu-bar-mode 0)
-    )
 )
 
 (add-hook 'minibuffer-setup-hook 'my-minibuffer-setup)
@@ -190,14 +192,33 @@
   (let ((fill-column (point-max)))
     (fill-paragraph nil)))
 
+(defun reconstruct-paragraph ()
+  "Takes a multi-line paragraph and makes it into a single line of text."
+  (interactive)
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil)
+    )
+  (replace-regexp "\\(\\w+\\)-\\s-+\\(\\w+\\)" "\\1\\2" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\s-*вЂ\”" "~---" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\(\\w+\\)-\\(\\w+\\)" "\\1\"=\\2" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\.\\.\\." "\\\\ldots{}" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\[\\([[:digit:]]+\\)\\]" "\\\\cite{b\\1}" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\(\\w\\|\\.\\):" "\\1\\\\,:" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\([тТ]\\.\\)\\s-*\\(\\w\\.\\)" "\\1~\\2" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\([[:upper:]]\\.\\)\\s-*\\([[:upper:]]\\.\\)\\s-+\\([[:upper:]]\\w*\\)" "\\1~\\2~\\3" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\([[:upper:]]\\.\\)\\s-+\\([[:upper:]]\\w*\\)" "\\1~\\2" nil (line-beginning-position) (line-end-position))
+  ;(replace-regexp "\"\\(\\w+\\)" "<<\1" nil (line-beginning-position) (line-end-position))
+  ;(replace-regexp "\\(\\w+\\)\"" "\1>>" nil (line-beginning-position) (line-end-position))
+  ;(replace-regexp "\"\\(\\.\\)\"" "<<\1>>" nil (line-beginning-position) (line-end-position))
+  ;(replace-regexp "\\s-+" "_")
+  )
+
+
 ;; Handy key definition
-(define-key global-map "\M-Q" 'unfill-paragraph)
+(define-key global-map [f9] 'reconstruct-paragraph)
 
 (require 'window-numbering)
 (window-numbering-mode 1)
-
-(tool-bar-mode 0)
-(scroll-bar-mode 0)
 
 (require 'ido)
 
@@ -221,11 +242,9 @@
 (global-set-key (kbd "C-x e") 'erase-buffer)
 (global-set-key (kbd "C-<escape>") 'keyboard-escape-quit)
 (global-unset-key (kbd "<escape>-<escape>-<escape>"))
-(global-set-key (kbd "C-q") 'undo)
-(global-set-key (kbd "C-z") 'quoted-insert)
+(global-set-key (kbd "C-q") 'quoted-insert)
+(global-set-key (kbd "C-z") 'undo)
 
-(global-set-key (kbd "C-x C-m") 'execute-extended-command)
-(global-set-key (kbd "C-с C-m") 'execute-extended-command)
 (global-set-key (kbd "s-<right>") 'next-buffer)
 (global-set-key (kbd "s-<left>") 'previous-buffer)
 (global-set-key (kbd "C-<return>") 'open-next-line)
@@ -261,8 +280,6 @@
       ediff-window-setup-function 'ediff-setup-windows-plain
       xterm-mouse-mode t
       )
-
-(mouse-wheel-mode t)
 
 (add-to-list 'safe-local-variable-values '(lexical-binding . t))
 (add-to-list 'safe-local-variable-values '(whitespace-line-column . 80))
@@ -411,7 +428,7 @@
       ;; (ac-fuzzy-complete)
       ;; (ac-use-fuzzy)
       ;; (add-hook 'after-make-frame-functions 'fullscreen-toggle)
-      (defun toggle-fullscreen (&optional f)
+      (defun toggle-fullscreen-1 (&optional f)
         (interactive)
         (let ((current-value (frame-parameter nil 'fullscreen)))
           (set-frame-parameter nil 'fullscreen
@@ -424,8 +441,8 @@
                                )
           )
         )
-      (global-set-key [f11] 'toggle-fullscreen)
-      (global-set-key (kbd "C-c f") 'toggle-fullscreen)
+      (global-set-key [f11] 'toggle-frame-fullscreen)
+      ;;(global-set-key (kbd "C-c f") 'toggle-fullscreen)
 	(if (not win32-system)
 	(progn
       (defun maximize-window (&optional f)
@@ -469,10 +486,10 @@
                           global-proc-buffer-name))))
 
 
-;(require 'jump-char)
+(require 'jump-char)
 
-;(global-set-key [(meta m)] 'jump-char-forward)
-;(global-set-key [(shift meta m)] 'jump-char-backward)
+(global-set-key [(meta m)] 'jump-char-forward)
+(global-set-key [(shift meta m)] 'jump-char-backward)
 
 (defun set-input-method-english ()
   (interactive)
@@ -656,7 +673,8 @@
   ;; (add-hook 'post-command-hook 'auto-language-environment)
   )
 
-(add-hook 'latex-mode-hook 'latex-12-hacks)
+;;(add-hook 'latex-mode-hook 'latex-12-hacks)
+
 (global-set-key (kbd "C-`") 'linum-mode)
 (put 'scroll-left 'disabled nil)
 
@@ -682,7 +700,7 @@
   (scroll-lock-move-to-column scroll-lock-temporary-goal-column)
   )
 
-(setq-default ispell-program-name "aspell")
+;(setq-default ispell-program-name "aspell")
 
 (load "server")
 (unless (server-running-p) (server-start))
@@ -721,10 +739,34 @@ ov)
 (require 'package)
 (add-to-list 'package-archives
              '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(add-to-list 'package-archives
+             '("marmalade" . "http://marmalade-repo.org/packages/") t)
 (package-initialize)
+
+; (package-activated-list)
+; (ace-jump-buffer ace-jump-mode auctex-latexmk auctex
+;  auctex-lua auto-complete-auctex cdlatex color-theme
+;  d-mode dash distinguished-theme fiplr goto-last-change
+;  grizzl jedi auto-complete epc ctable concurrent lua-mode
+;  magit-gh-pulls gh logito magit-push-remote magit git-rebase-mode
+;  git-commit-mode markdown-mode+ markdown-mode pcache popup
+;  python-environment deferred s smex yasnippet)
+
 ;(unless (package-installed-p 'scala-mode2)
 ;  (package-refresh-contents) (package-install 'scala-mode2))
 (put 'erase-buffer 'disabled nil)
+;; (defun packages-reinstall (&optional arg)
+;;   "Reinstall activated packages."
+;;   (interactive "p")
+;;   (mapcar
+;;    (lambda (package)
+;;      (when (package-installed-p package)
+;;        (package-uninstall))
+;;      (package-install package)
+;;    )
+;;    package-activated-list
+;;    )
+;; )
 
 (require 'compile)
 (add-to-list
@@ -746,3 +788,97 @@ ov)
 (if (not (functionp 'rope-before-save-actions))
     (defun rope-before-save-actions ())
 )
+
+;; AuCTeX Setups
+
+
+(setq TeX-auto-save t)
+(setq TeX-parse-self t)
+; (setq-default TeX-master nil)
+(custom-set-variables
+'(TeX-PDF-mode t)
+'(TeX-master nil)
+'(TeX-source-correlate-method (quote synctex))
+'(TeX-source-correlate-mode t)
+'(TeX-source-correlate-start-server (quote ask)))
+
+(require 'rw-language-and-country-codes)
+(require 'rw-ispell)
+(require 'rw-hunspell)
+(add-to-list 'ispell-local-dictionary-alist  '("russian"
+        "[АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчшщьыъэюя]"
+        "[^АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчшщьыъэюя]"
+        "[-]"  nil ("-d" "ru_RU") nil utf-8)
+)
+
+(add-to-list 'ispell-local-dictionary-alist  '("english"
+       "[A-Za-z]" "[^A-Za-z]"
+       "[']"  nil ("-d" "en_US") nil iso-8859-1)
+)
+(setq ispell-program-name "hunspell")
+(setq ispell-really-aspell nil
+      ispell-really-hunspell t)
+(setq ispell-dictionary "russian") ;"ru_RU_hunspell")
+;;; The following is set via custom
+(custom-set-variables
+ '(rw-hunspell-default-dictionary "russian") ;"ru_RU_hunspell")
+ '(rw-hunspell-dicpath-list (quote ("/usr/share/hunspell")))
+ '(rw-hunspell-make-dictionary-menu t)
+ '(rw-hunspell-use-rw-ispell t)
+)
+
+(defun fd-switch-dictionary()
+  (interactive)
+      (let* ((dic ispell-current-dictionary)
+             (change (if (string= dic "russian") "english" "russian")))
+        (ispell-change-dictionary change)
+        (message "Dictionary switched from %s to %s" dic change)
+        ))
+
+;(require 'ispell-multi)
+;(require 'flyspell-babel)
+
+;(autoload 'flyspell-babel-setup "flyspell-babel")
+;(add-hook 'latex-mode-hook 'flyspell-babel-setup)
+
+(global-set-key (kbd "<f8>")   'fd-switch-dictionary)
+(global-set-key (kbd "<f7>")   'ispell-word)
+(put 'upcase-region 'disabled nil)
+
+(autoload
+  'ace-jump-mode
+  "ace-jump-mode"
+  "Emacs quick move minor mode"
+  t)
+
+(define-key global-map (kbd "C-c SPC") 'ace-jump-mode)
+
+;; enable a more powerful jump back function from ace jump mode
+(autoload
+  'ace-jump-mode-pop-mark
+  "ace-jump-mode"
+  "Ace jump back:-)"
+  t)
+(eval-after-load "ace-jump-mode"
+  '(ace-jump-mode-enable-mark-sync))
+(define-key global-map (kbd "C-x SPC") 'ace-jump-mode-pop-mark)
+
+(global-set-key (kbd "C-x f") 'fiplr-find-file)
+
+;; Standard Jedi.el setting
+
+; does not work now.
+;(add-hook 'python-mode-hook 'jedi:setup)
+;(setq jedi:complete-on-dot t)
+
+;; Type:
+;;     M-x package-install RET jedi RET
+;;     M-x jedi:install-server RET
+;; Then open Python file.
+
+;; Save point position between sessions
+(require 'saveplace)
+(setq-default save-place t)
+(setq save-place-file (expand-file-name ".places" user-emacs-directory))
+
+(global-set-key "\C-x\ \C-m" 'magit-status)
