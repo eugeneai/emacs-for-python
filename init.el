@@ -700,7 +700,7 @@
   (scroll-lock-move-to-column scroll-lock-temporary-goal-column)
   )
 
-;(setq-default ispell-program-name "aspell")
+(setq-default ispell-program-name "aspell")
 
 (load "server")
 (unless (server-running-p) (server-start))
@@ -804,33 +804,34 @@ ov)
 
 (require 'rw-language-and-country-codes)
 (require 'rw-ispell)
-(require 'rw-hunspell)
-(add-to-list 'ispell-local-dictionary-alist  '("russian"
+;(require 'rw-hunspell)
+(add-to-list 'ispell-local-dictionary-alist  '("ru-yeyo"
         "[АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчшщьыъэюя]"
         "[^АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчшщьыъэюя]"
-        "[-]"  nil ("-d" "ru_RU") nil utf-8)
+        "[-]"  nil ("-d" "ru-yeyo") nil utf-8)
 )
 
 (add-to-list 'ispell-local-dictionary-alist  '("english"
        "[A-Za-z]" "[^A-Za-z]"
        "[']"  nil ("-d" "en_US") nil iso-8859-1)
 )
-(setq ispell-program-name "hunspell")
-(setq ispell-really-aspell nil
-      ispell-really-hunspell t)
-(setq ispell-dictionary "russian") ;"ru_RU_hunspell")
+;(setq ispell-program-name "hunspell")
+(setq ispell-really-aspell t)
+;(setq ispell-really-aspell nil
+;      ispell-really-hunspell t)
+(setq ispell-dictionary "ru-yeyo") ;"ru_RU_hunspell")
 ;;; The following is set via custom
-(custom-set-variables
- '(rw-hunspell-default-dictionary "russian") ;"ru_RU_hunspell")
- '(rw-hunspell-dicpath-list (quote ("/usr/share/hunspell")))
- '(rw-hunspell-make-dictionary-menu t)
- '(rw-hunspell-use-rw-ispell t)
-)
+;(custom-set-variables
+; '(rw-hunspell-default-dictionary "russian") ;"ru_RU_hunspell")
+; '(rw-hunspell-dicpath-list (quote ("/usr/share/hunspell")))
+; '(rw-hunspell-make-dictionary-menu t)
+; '(rw-hunspell-use-rw-ispell t)
+;)
 
 (defun fd-switch-dictionary()
   (interactive)
       (let* ((dic ispell-current-dictionary)
-             (change (if (string= dic "russian") "english" "russian")))
+             (change (if (string= dic "ru-yeyo") "english" "ru-yeyo")))
         (ispell-change-dictionary change)
         (message "Dictionary switched from %s to %s" dic change)
         ))
