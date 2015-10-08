@@ -1,3 +1,107 @@
+(if (eq window-system 'w32)
+    (progn
+      (if (file-directory-p "c:/GNU/bin")
+          (progn
+            (add-to-list 'exec-path "c:/GNU/bin")
+            )
+        )
+      (setq url-proxy-services '(("no_proxy" . "172.27.24.")
+                                 ("http" . "titan.cyber:ghbdtnbr@172.27.100.5:4444")))
+
+      )
+  )
+
+(custom-set-variables
+ '(load-prefer-newer t)
+ '(epy-load-yasnippet-p t)
+ )
+
+(require 'package)
+
+; list the packages you want
+(setq package-list '(auctex magit
+			    auctex-latexmk
+			    ace-jump-mode
+			    color-theme
+			    cursor-chg
+			    d-mode
+			    ace-jump-mode
+			    ace-jump-buffer
+			    ace-jump-zap
+			    auto-complete
+			    auto-complete-auctex
+					; auto-dictionary-readme.txt
+					; ediprolog
+					; eide
+					; enclose
+			    fiplr
+			    gh
+			    goto-last-change
+			    jedi
+			    lua-mode
+			    magit-find-file
+			    magit-gh-pulls
+			    markdown-mode+
+			    markdown-mode
+			    python-environment
+			    s
+			    w3m
+			    yasnippet
+			    ;rw-ispell
+			    ;rw-hunspell
+                            ;rw-language-and-country-codes
+                            htmlize
+))
+
+; list the repositories containing them
+(setq package-archives '(("elpa" . "http://tromey.com/elpa/")
+			 ("melpa" . "http://melpa.milkbox.net/packages/")
+                         ("gnu" . "http://elpa.gnu.org/packages/")
+                         ("marmalade" . "https://marmalade-repo.org/packages/")))
+
+; activate all the packages (in particular autoloads)
+(package-initialize)
+
+; fetch the list of packages available
+(unless package-archive-contents
+  (package-refresh-contents))
+
+; install the missing packages
+(dolist (package package-list)
+  (unless (package-installed-p package)
+    (package-install package)))
+
+(setq magit-last-seen-setup-instructions "1.4.0")
+
+(require 'auctex-latexmk)
+(auctex-latexmk-setup)
+
+; (setq-default TeX-master nil)
+(custom-set-variables
+; '(TeX-install-font-lock 'tex-font-setup)
+ '(TeX-auto-save t)
+ '(TeX-parse-self t)
+ '(TeX-master nil)
+ '(TeX-save-query nil)
+ '(TeX-source-correlate-method (quote synctex))
+ '(TeX-source-correlate-mode t)
+ '(TeX-source-correlate-start-server (quote ask)))
+
+(add-hook 'LaTeX-mode-hook 'LaTeX-math-mode)
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+(add-hook 'LaTeX-mode-hook 'turn-off-auto-fill)
+(add-hook 'LaTeX-mode-hook 'turn-on-visual-line-mode)
+(add-hook 'LaTeX-mode-hook 'turn-on-flyspell)
+
+(setq reftex-plug-into-AUCTeX t)
+
+(require 'cursor-chg)
+(setq curchg-default-cursor-color "LightSkyBlue1")
+(setq curchg-input-method-cursor-color "red")
+(setq curchg-default-cursor-type '(hbar . 5))
+(change-cursor-mode 1) ; On for overwrite/read-only/input mode
+(toggle-cursor-type-when-idle 1) ; On when idle
+
 (setq windowed-system (or (eq window-system 'x) (eq window-system 'w32)))
 (setq win32-system (eq window-system 'w32))
 
@@ -38,7 +142,7 @@
 (add-to-list 'load-path ".")
 
 ;; Keep emacs Custom-settings in separate file
-(if windowed-system
+(if t ;; windowed-system
     (progn
       (tool-bar-mode 0)
       (scroll-bar-mode 0)
@@ -79,7 +183,7 @@
 (load-file (expand-file-name "epy/epy-init.el" dotfiles-dir))
 
 (if
-    windowed-system
+    t ;;windowed-system
     (setq linum-format "%4d ")
   (progn
     (setq linum-format "%3d ")
@@ -135,10 +239,9 @@
 ;;  recentf-max-menu-items 20
   )
 (global-set-key "\C-x\ \C-r" 'recentf-open-files)
-(recentf-update-menu-hook)
 
 (if
-    windowed-system
+    t ;;windowed-system
     (progn
       ;(require 'tabbar)
       ;(tabbar-mode)
@@ -183,7 +286,7 @@
         ((progn
            (backward-char 1)
            (looking-at "\\s\)")) (forward-char 1) (backward-list 1))))
-(define-key global-map (kbd "C-x p") 'goto-matching-paren) ; Bind to C-z p
+(define-key global-map (kbd "C-x p p") 'goto-matching-paren) ; Bind to C-z p
 
 ;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph
 (defun unfill-paragraph ()
@@ -199,11 +302,11 @@
     (fill-paragraph nil)
     )
   (replace-regexp "\\(\\w+\\)-\\s-+\\(\\w+\\)" "\\1\\2" nil (line-beginning-position) (line-end-position))
-  (replace-regexp "\\s-*вЂ\”" "~---" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\s-*вЂ\”" "~--" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\(\\w+\\)-\\(\\w+\\)" "\\1\"=\\2" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\.\\.\\." "\\\\ldots{}" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\[\\([[:digit:]]+\\)\\]" "\\\\cite{b\\1}" nil (line-beginning-position) (line-end-position))
-  (replace-regexp "\\(\\w\\|\\.\\):" "\\1\\\\,:" nil (line-beginning-position) (line-end-position))
+  ;(replace-regexp "\\(\\w\\|\\.\\):" "\\1\\\\,:" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\([тТ]\\.\\)\\s-*\\(\\w\\.\\)" "\\1~\\2" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\([[:upper:]]\\.\\)\\s-*\\([[:upper:]]\\.\\)\\s-+\\([[:upper:]]\\w*\\)" "\\1~\\2~\\3" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\([[:upper:]]\\.\\)\\s-+\\([[:upper:]]\\w*\\)" "\\1~\\2" nil (line-beginning-position) (line-end-position))
@@ -213,25 +316,44 @@
   ;(replace-regexp "\\s-+" "_")
   )
 
+(defun reconstruct-minted ()
+  "From cursor till '\end{' performs text cleaning."
+  (interactive)
+  (let ((endpos (point)))
+    (save-excursion
+      (goto-char (mark))
+      (beginning-of-line)
+      (while (< (point) endpos)
+        ;; (funcall fun (buffer-substring (line-beginning-position) (line-end-position)))
+        (reconstruct-minted-line)
+        )
+      )
+    )
+  )
+
+(defun reconstruct-minted-line ()
+  (interactive)
+  (beginning-of-line)
+  (replace-regexp "\\\\textquotedbl{}" "\"" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "#doctest:.*$" "" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "^\\.\\.\\." "   " nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\~" " " nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\\\" "" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "{\\[}" "[" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "{\\]}" "]" nil (line-beginning-position) (line-end-position))
+  (forward-line 1)
+  ; #doctest: +ELLIPSIS
+  )
 
 ;; Handy key definition
 (define-key global-map [f9] 'reconstruct-paragraph)
+(define-key global-map [f12] 'reconstruct-minted-line)
 
 (require 'window-numbering)
 (window-numbering-mode 1)
-
 (require 'ido)
-
-;;(require 'dired+)
-;;(require 'highlight-80+)
-;;(require 'window-numbering)
-;;(window-numbering-mode 1)
-;;(setq window-numbering-assign-func
-;;      (lambda () (when (equal (buffer-name) "*Calculator*") 9)))
 (require 'highlight-80+)
-
-;(require 'python-mode)
-;(require 'ipython)
+(highlight-80+-mode)
 
 
 (add-to-list 'auto-mode-alist '("\\.zcml\\'" . xml-mode))
@@ -324,6 +446,10 @@
 (add-hook 'python-mode-hook 'imenu-add-defs-to-menubar)
 (global-set-key [S-mouse-3] 'imenu)
 
+(require 'highlight-indentation)
+(add-hook 'python-mode-hook 'highlight-indentation)
+(add-hook 'python-mode-hook (lambda ()(setq skeleton-pair nil)))
+
 ;;; Set some more
 
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -351,6 +477,37 @@
 (add-hook 'python-mode-hook '(lambda () (define-key python-mode-map (kbd "C-c C-t") 'python-add-breakpoint)))
 (add-hook 'python-mode-hook '(lambda () (define-key python-mode-map (kbd "C-c C-y") 'python-add-pubreakpoint)))
 
+(add-hook 'python-mode-hook '(lambda ()
+                               (define-key python-mode-map (kbd "C-c C-y") 'python-add-pubreakpoint)
+                               (electric-indent-local-mode -1)
+                               (local-set-key (kbd "C-j") #'newline-and-indent)
+                               ))
+
+(defun tex-add-russian-dash ()
+  (interactive)
+  (insert "~-- "))
+
+;(add-hook 'late-mode-hook (lambda ()
+;                (local-set-key (kbd "C-=") #'tex-add-russian-dash)))
+
+(defun tex-add-verb-environment ()
+  (interactive)
+  (open-next-line 1)
+  (insert "{\\tt%")
+  (open-next-line 1)(beginning-of-line)
+  (insert "\\begin{verbatim}")
+  (open-next-line 1)
+  (open-next-line 1)
+  (insert "\\end{verbatim}%")
+  (open-next-line 1)(beginning-of-line)
+  (insert "}%")
+  (backward-char 2)
+  (forward-line -2)
+  )
+
+(global-set-key (kbd "C-=") 'tex-add-russian-dash)
+(global-set-key (kbd "C-c C-=") 'tex-add-verb-environment)
+
 (defun my-ttt ()
   (erase-buffer)
   (face-remap-add-relative 'default '(
@@ -377,7 +534,7 @@
 (load custom-file)
 
 (if
-    windowed-system
+    t   ;; windowed-system
     (progn
       ;; This script is set for a `text-scale-mode-step` of `1.04`
       (setq text-scale-mode-step 1.2)
@@ -502,20 +659,6 @@
   (insert "\\")
 )
 
-(defun ask-user-latex-command (cmd)
-  "Prompt user to enter a string, with input history support."
-  (interactive (list (read-string "LaTeX Command:")) )
-  ;; (message "String is 「%s」." cmd)
-  (insert "\\")
-  (insert cmd)
-  (insert "{}")(backward-char)
-  )
-
-(defun latex-set-b-slash-hack ()
-  (interactive)
-  (local-set-key (kbd "\\") 'ask-user-latex-command)
-  )
-
 ;; (set-background-color        "wheat3") ; Set emacs bg color
 
 ;;(toggle-fullscreen)
@@ -527,6 +670,7 @@
   (set-input-method-english)
   (insert "$$")
   (backward-char)
+  (set-input-method-english)
 )
 
 (defun latex-dollar-hack ()
@@ -534,13 +678,19 @@
   (local-set-key (kbd "C-4") 'dollar-equation)
   )
 
+(defun turn-off-auto-fill ()
+  (interactive)
+  (auto-fill-mode 0))
+
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 (add-hook 'text-mode-hook 'turn-on-flyspell)
 
-(add-hook 'latex-mode-hook 'turn-off-auto-fill)
 (add-hook 'text-mode-hook 'turn-on-visual-line-mode)
 (add-hook 'diff-mode-hook 'turn-on-visual-line-mode)
+(add-hook 'latex-mode-hook 'turn-off-auto-fill)
+(add-hook 'latex-mode-hook 'turn-on-visual-line-mode)
 (add-hook 'latex-mode-hook 'turn-on-flyspell)
+
 ;;(add-hook 'latex-mode-hook 'highlight-changes-mode)
 
 (global-set-key (kbd "C-<menu>") 'toggle-input-method)
@@ -624,6 +774,7 @@
 
 (defun auto-language-environment ()
   (interactive)
+  ;; (print last-command this-command)
   (cond
    (
     (and
@@ -635,6 +786,9 @@
      )
     t
     )
+   ((eq this-command 'dollar-equation)
+    (set-input-method-english)
+    t)
    (
     (or
      (eq this-command 'toggle-input-method)
@@ -669,11 +823,10 @@
 
 (defun latex-12-hacks ()
   (latex-dollar-hack)
-  (latex-set-b-slash-hack)
-  ;; (add-hook 'post-command-hook 'auto-language-environment)
+  ; (add-hook 'post-command-hook 'auto-language-environment)
   )
 
-;;(add-hook 'latex-mode-hook 'latex-12-hacks)
+(add-hook 'LaTeX-mode-hook 'latex-12-hacks)
 
 (global-set-key (kbd "C-`") 'linum-mode)
 (put 'scroll-left 'disabled nil)
@@ -700,8 +853,11 @@
   (scroll-lock-move-to-column scroll-lock-temporary-goal-column)
   )
 
+<<<<<<< HEAD
 (setq-default ispell-program-name "aspell")
 
+=======
+>>>>>>> 04a15503f08c87d5e8b029b8de53366fc37a6232
 (load "server")
 (unless (server-running-p) (server-start))
 
@@ -735,38 +891,7 @@ ov)
                             ))
 ;;-------------------------------------------------------------
 
-
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/") t)
-(add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
-(package-initialize)
-
-; (package-activated-list)
-; (ace-jump-buffer ace-jump-mode auctex-latexmk auctex
-;  auctex-lua auto-complete-auctex cdlatex color-theme
-;  d-mode dash distinguished-theme fiplr goto-last-change
-;  grizzl jedi auto-complete epc ctable concurrent lua-mode
-;  magit-gh-pulls gh logito magit-push-remote magit git-rebase-mode
-;  git-commit-mode markdown-mode+ markdown-mode pcache popup
-;  python-environment deferred s smex yasnippet)
-
-;(unless (package-installed-p 'scala-mode2)
-;  (package-refresh-contents) (package-install 'scala-mode2))
 (put 'erase-buffer 'disabled nil)
-;; (defun packages-reinstall (&optional arg)
-;;   "Reinstall activated packages."
-;;   (interactive "p")
-;;   (mapcar
-;;    (lambda (package)
-;;      (when (package-installed-p package)
-;;        (package-uninstall))
-;;      (package-install package)
-;;    )
-;;    package-activated-list
-;;    )
-;; )
 
 (require 'compile)
 (add-to-list
@@ -789,19 +914,6 @@ ov)
     (defun rope-before-save-actions ())
 )
 
-;; AuCTeX Setups
-
-
-(setq TeX-auto-save t)
-(setq TeX-parse-self t)
-; (setq-default TeX-master nil)
-(custom-set-variables
-'(TeX-PDF-mode t)
-'(TeX-master nil)
-'(TeX-source-correlate-method (quote synctex))
-'(TeX-source-correlate-mode t)
-'(TeX-source-correlate-start-server (quote ask)))
-
 (require 'rw-language-and-country-codes)
 (require 'rw-ispell)
 ;(require 'rw-hunspell)
@@ -815,6 +927,7 @@ ov)
        "[A-Za-z]" "[^A-Za-z]"
        "[']"  nil ("-d" "en_US") nil iso-8859-1)
 )
+<<<<<<< HEAD
 ;(setq ispell-program-name "hunspell")
 (setq ispell-really-aspell t)
 ;(setq ispell-really-aspell nil
@@ -827,6 +940,41 @@ ov)
 ; '(rw-hunspell-make-dictionary-menu t)
 ; '(rw-hunspell-use-rw-ispell t)
 ;)
+=======
+
+;(setq ispell-program-name "hunspell")
+(setq ispell-program-name (executable-find "hunspell"))
+(setq ispell-really-aspell nil
+      ispell-really-hunspell t)
+(setq ispell-dictionary "russian") ;"ru_RU_hunspell")
+;; The following is set via custom
+(custom-set-variables
+ '(rw-hunspell-default-dictionary "russian") ;"ru_RU_hunspell")
+ '(rw-hunspell-dicpath-list (quote ("/usr/share/hunspell")))
+ '(rw-hunspell-make-dictionary-menu t)
+ '(rw-hunspell-use-rw-ispell t)
+ )
+
+(if (eq window-system 'w32)
+    (progn
+      (custom-set-variables
+       '(rw-hunspell-dicpath-list (quote ("c:/GNU/share/hunspell")))
+       )
+      )
+  )
+
+;(setq ispell-program-name "c:/GNU/bin/aspell")
+;(setq ispell-program-name "aspell")
+;(setq ispell-personal-dictionary "C:/GNU/custom.ispell")
+
+;; (setq ispell-extra-args
+;;       '("--data-dir" "C:/GNU/data"
+;;         "--dict-dir" "C:/GNU/dict"
+;;         )
+;;       )
+
+(require 'ispell)
+>>>>>>> 04a15503f08c87d5e8b029b8de53366fc37a6232
 
 (defun fd-switch-dictionary()
   (interactive)
@@ -883,3 +1031,23 @@ ov)
 (setq save-place-file (expand-file-name ".places" user-emacs-directory))
 
 (global-set-key "\C-x\ \C-m" 'magit-status)
+
+(setq ring-bell-function
+      (lambda ()
+	(unless (memq this-command
+		      '(isearch-abort abort-recursive-edit exit-minibuffer keyboard-quit))
+	  (ding))))
+
+;; Multitran dictionary lookup
+(defun multitran-lookup-english (keyword)
+  (interactive (list (thing-at-point 'word)))
+  (switch-to-buffer-other-window
+   (eww
+   ;; (w3m-goto-url
+    (concat "http://multitran.ru/c/m.exe?l1=1&s=" keyword "&%CF%EE%E8%F1%EA=%CF%EE%E8%F1%EA")
+    )
+   )
+  ;;(run-at-time 4 nil 'iconify-frame)
+  )
+
+(global-set-key (kbd "C-c m") 'multitran-lookup-english)

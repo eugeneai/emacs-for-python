@@ -15,6 +15,10 @@ site-lisp/
 *#*#
 commit.txt
 .places
-elpa/*/*autoloads.el
-elpa/archives
-/places
+url/
+recentf
+server/
+bookmarks
+/elpa/
+places/
+
