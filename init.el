@@ -853,11 +853,8 @@
   (scroll-lock-move-to-column scroll-lock-temporary-goal-column)
   )
 
-<<<<<<< HEAD
 (setq-default ispell-program-name "aspell")
 
-=======
->>>>>>> 04a15503f08c87d5e8b029b8de53366fc37a6232
 (load "server")
 (unless (server-running-p) (server-start))
 
@@ -940,41 +937,6 @@ ov)
 ; '(rw-hunspell-make-dictionary-menu t)
 ; '(rw-hunspell-use-rw-ispell t)
 ;)
-=======
-
-;(setq ispell-program-name "hunspell")
-(setq ispell-program-name (executable-find "hunspell"))
-(setq ispell-really-aspell nil
-      ispell-really-hunspell t)
-(setq ispell-dictionary "russian") ;"ru_RU_hunspell")
-;; The following is set via custom
-(custom-set-variables
- '(rw-hunspell-default-dictionary "russian") ;"ru_RU_hunspell")
- '(rw-hunspell-dicpath-list (quote ("/usr/share/hunspell")))
- '(rw-hunspell-make-dictionary-menu t)
- '(rw-hunspell-use-rw-ispell t)
- )
-
-(if (eq window-system 'w32)
-    (progn
-      (custom-set-variables
-       '(rw-hunspell-dicpath-list (quote ("c:/GNU/share/hunspell")))
-       )
-      )
-  )
-
-;(setq ispell-program-name "c:/GNU/bin/aspell")
-;(setq ispell-program-name "aspell")
-;(setq ispell-personal-dictionary "C:/GNU/custom.ispell")
-
-;; (setq ispell-extra-args
-;;       '("--data-dir" "C:/GNU/data"
-;;         "--dict-dir" "C:/GNU/dict"
-;;         )
-;;       )
-
-(require 'ispell)
->>>>>>> 04a15503f08c87d5e8b029b8de53366fc37a6232
 
 (defun fd-switch-dictionary()
   (interactive)
