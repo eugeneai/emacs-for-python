@@ -13,70 +13,19 @@
 
 (custom-set-variables
  '(load-prefer-newer t)
- '(epy-load-yasnippet-p t)
  )
 
-(require 'package)
+(load "~/.emacs.d/init-packages")
 
-; list the packages you want
-(setq package-list '(auctex magit
-			    auctex-latexmk
-			    ace-jump-mode
-			    color-theme
-			    cursor-chg
-			    d-mode
-			    ace-jump-mode
-			    ace-jump-buffer
-			    ace-jump-zap
-			    auto-complete
-			    auto-complete-auctex
-					; auto-dictionary-readme.txt
-					; ediprolog
-					; eide
-					; enclose
-			    fiplr
-			    gh
-			    goto-last-change
-			    jedi
-			    lua-mode
-			    magit-find-file
-			    magit-gh-pulls
-			    markdown-mode+
-			    markdown-mode
-			    python-environment
-			    s
-			    w3m
-			    yasnippet
-			    ;rw-ispell
-			    ;rw-hunspell
-                            ;rw-language-and-country-codes
-                            htmlize
-                            ;; flycheck
-                            ;;company
-                            ;;company-racer
-                            ;;racer
-                            ;; flycheck-rust
-                            rust-mode
-                            js2-mode
-))
+;; (require 'auto-complete)
 
-; list the repositories containing them
-(setq package-archives '(("elpa" . "http://tromey.com/elpa/")
-			 ("melpa" . "http://melpa.milkbox.net/packages/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")
-                         ("marmalade" . "https://marmalade-repo.org/packages/")))
+;; (add-to-list 'ac-dictionary-directories "~/.emacs.d/dict")
+;; (require 'auto-complete-config)
+;; (ac-config-default)
 
-; activate all the packages (in particular autoloads)
-(package-initialize)
-
-; fetch the list of packages available
-(unless package-archive-contents
-  (package-refresh-contents))
-
-; install the missing packages
-(dolist (package package-list)
-  (unless (package-installed-p package)
-    (package-install package)))
+(custom-set-variables
+ '(epy-load-yasnippet-p t)
+ )
 
 (setq magit-last-seen-setup-instructions "1.4.0")
 
@@ -84,28 +33,32 @@
 (auctex-latexmk-setup)
 
 ;; Enable company globally for all mode
-(global-company-mode)
+;;(global-company-mode)
+(add-hook 'after-init-hook 'global-company-mode)
 
 ;; Reduce the time after which the company auto completion popup opens
 (setq company-idle-delay 0.2)
 
 ;; Reduce the number of characters before company kicks in
-(setq company-minimum-prefix-length 2)
+(setq company-minimum-prefix-length 1)
 
 ;; Здесь указываем путь к бинарнику racer
-(setq racer-cmd "/usr/bin/racer")
+;;(setq racer-cmd "/usr/bin/racer")
 
 ;; Путь к исходникам Rust
-(setq racer-rust-src-path "/home/eugeneai/.rust/src/")
+(setq racer-rust-src-path "~/.rust/src/")
 
 ;; Load rust-mode when you open `.rs` files
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
 
-;;;(add-hook 'rust-mode-hook #'racer-mode)
+;;(add-hook 'rust-mode-hook #'racer-mode)
 
 ;; Setting up configurations when you load rust-mode
 (add-hook 'rust-mode-hook
           '(lambda ()
+             ;;(auto-complete 1)
+             ;;(company-mode 1)
+             (racer-mode)
              ;; Enable racer
              ;; (racer-activate)
              (local-set-key (kbd "TAB") #'company-indent-or-complete-common) ;
@@ -128,6 +81,8 @@
           )
 
 (add-hook 'racer-mode-hook #'eldoc-mode)
+(eval-after-load 'flycheck
+  '(add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ; (setq-default TeX-master nil)
 (custom-set-variables
@@ -218,18 +173,19 @@
 ;; Write backup files to own directory
 (setq backup-directory-alist `(("." . ,(expand-file-name
                                         (concat dotfiles-dir "backups")))))
-(require 'auto-complete)
 
 (require 'linum)
 
 ;;(global-linum-mode 1)
-;; (global-auto-complete-mode 1)
-(define-globalized-minor-mode real-global-auto-complete-mode
-  auto-complete-mode (lambda ()
-                       (if (not (minibufferp (current-buffer)))
-                         (auto-complete-mode 1))
-                       ))
-(real-global-auto-complete-mode t)
+;;(global-auto-complete-mode 1)
+;; (define-globalized-minor-mode real-global-auto-complete-mode
+;;   auto-complete-mode (lambda ()
+;;                        (if (not (minibufferp (current-buffer)))
+;;                          (auto-complete-mode 1))
+;;                        ))
+;; (real-global-auto-complete-mode t)
+
+(global-company-mode 1)
 
 (if win32-system
     (setenv "PYMACS_PYTHON" "c:/python27/python.exe")
@@ -258,8 +214,8 @@
                                 ("\\.tex$" . latex-mode)
                                 )
                                auto-mode-alist))
-(add-hook 'prolog-mode-hook 'auto-complete-mode)
-(add-hook 'd-mode-hook 'auto-complete-mode)
+;;(add-hook 'prolog-mode-hook 'auto-complete-mode)
+;;(add-hook 'd-mode-hook 'auto-complete-mode)
 
 
 (autoload 'flyspell-mode "flyspell" "On-the-fly spelling checker." t)
