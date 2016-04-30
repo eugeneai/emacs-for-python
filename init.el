@@ -33,7 +33,8 @@
   (require 'compile)
   (set (make-local-variable 'compile-command)
        (if (locate-dominating-file (buffer-file-name) "Cargo.toml")
-           "cargo run"
+           "cargo build"
+;;           "cargo run"
          (format "rustc %s && %s" (buffer-file-name)
                  (file-name-sans-extension (buffer-file-name))))))
 
