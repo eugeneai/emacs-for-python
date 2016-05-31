@@ -58,6 +58,7 @@
                             ;; flycheck-rust
                             rust-mode
                             js2-mode
+                            company
 ))
 
 ; list the repositories containing them
@@ -997,7 +998,7 @@ ov)
        "[A-Za-z]" "[^A-Za-z]"
        "[']"  nil ("-d" "en_US") nil iso-8859-1)
 )
-<<<<<<< HEAD
+
 ;(setq ispell-program-name "hunspell")
 (setq ispell-really-aspell t)
 ;(setq ispell-really-aspell nil
