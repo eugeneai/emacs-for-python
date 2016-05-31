@@ -51,6 +51,13 @@
 			    ;rw-hunspell
                             ;rw-language-and-country-codes
                             htmlize
+                            ;; flycheck
+                            ;;company
+                            ;;company-racer
+                            ;;racer
+                            ;; flycheck-rust
+                            rust-mode
+                            js2-mode
 ))
 
 ; list the repositories containing them
@@ -75,6 +82,52 @@
 
 (require 'auctex-latexmk)
 (auctex-latexmk-setup)
+
+;; Enable company globally for all mode
+(global-company-mode)
+
+;; Reduce the time after which the company auto completion popup opens
+(setq company-idle-delay 0.2)
+
+;; Reduce the number of characters before company kicks in
+(setq company-minimum-prefix-length 2)
+
+;; Здесь указываем путь к бинарнику racer
+(setq racer-cmd "/usr/bin/racer")
+
+;; Путь к исходникам Rust
+(setq racer-rust-src-path "/home/eugeneai/.rust/src/")
+
+;; Load rust-mode when you open `.rs` files
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+
+;;;(add-hook 'rust-mode-hook #'racer-mode)
+
+;; Setting up configurations when you load rust-mode
+(add-hook 'rust-mode-hook
+          '(lambda ()
+             ;; Enable racer
+             ;; (racer-activate)
+             (local-set-key (kbd "TAB") #'company-indent-or-complete-common) ;
+
+             ;; Hook in racer with eldoc to provide documentation
+             (eldoc-mode)
+
+             ;; Use flycheck-rust in rust-mode
+             (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
+
+             ;; Use company-racer in rust mode
+             (set (make-local-variable 'company-backends) '(company-racer))
+
+             ;; Key binding to jump to method definition
+             (local-set-key (kbd "M-.") #'racer-find-definition)
+
+             ;; Key binding to auto complete and indent
+             ;; (local-set-key (kbd "TAB") #'racer-complete-or-indent)
+             )
+          )
+
+(add-hook 'racer-mode-hook #'eldoc-mode)
 
 ; (setq-default TeX-master nil)
 (custom-set-variables
@@ -144,10 +197,14 @@
 ;; Keep emacs Custom-settings in separate file
 (if t ;; windowed-system
     (progn
+      (if windowed-system
+          (progn
+            (tool-bar-mode 0)
+	    (scroll-bar-mode 0)
+            )
+          )
       (if win32-system
           (progn
-	    (tool-bar-mode 0)
-	    (scroll-bar-mode 0)
             (setq custom-file (expand-file-name "custom-w32.el" dotfiles-dir))
             )
         (progn
@@ -161,7 +218,6 @@
 ;; Write backup files to own directory
 (setq backup-directory-alist `(("." . ,(expand-file-name
                                         (concat dotfiles-dir "backups")))))
-
 (require 'auto-complete)
 
 (require 'linum)
@@ -251,7 +307,7 @@
       (global-font-lock-mode t)
       (setq font-lock-maximum-decoration t)
       )
-  (progn 
+  (progn
     (setq window-numbering-assign-func
 	  (lambda () (when (equal (buffer-name) "*Calculator*") 9)))
     )
@@ -306,6 +362,7 @@
     )
   (replace-regexp "\\(\\w+\\)-\\s-+\\(\\w+\\)" "\\1\\2" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\s-*вЂ\”" "~--" nil (line-beginning-position) (line-end-position))
+  (replace-regexp "\\s—" "~--" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\(\\w+\\)-\\(\\w+\\)" "\\1\"=\\2" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\.\\.\\." "\\\\ldots{}" nil (line-beginning-position) (line-end-position))
   (replace-regexp "\\[\\([[:digit:]]+\\)\\]" "\\\\cite{b\\1}" nil (line-beginning-position) (line-end-position))
@@ -515,8 +572,8 @@
   (erase-buffer)
   (face-remap-add-relative 'default '(
           ; :family "Monospace"
-           :height 160 ;Seseg
-          ; :height 88
+          ; :height 160 ;Seseg
+           :height 88
           ))
 )
 
@@ -533,6 +590,19 @@
 (add-to-list 'auto-mode-alist '("\\.vapi$" . vala-mode))
 (add-to-list 'file-coding-system-alist '("\\.vala$" . utf-8))
 (add-to-list 'file-coding-system-alist '("\\.vapi$" . utf-8))
+
+;; JavaScript
+
+(add-to-list 'auto-mode-alist '("\\.json$" . js-mode))
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+;(add-hook 'js-mode-hook 'js2-minor-mode)
+(add-hook 'js2-mode-hook 'ac-js2-mode)
+(add-to-list 'interpreter-mode-alist '("node" . js2-mode))
+(setq js2-highlight-level 3)
+
+(add-hook 'js2-mode-hook 'skewer-mode)
+(add-hook 'css-mode-hook 'skewer-css-mode)
+(add-hook 'html-mode-hook 'skewer-html-mode)
 
 (load custom-file)
 
@@ -648,8 +718,8 @@
 
 (require 'jump-char)
 
-(global-set-key [(meta m)] 'jump-char-forward)
-(global-set-key [(shift meta m)] 'jump-char-backward)
+(global-set-key [(meta \])] 'jump-char-forward)
+(global-set-key [(meta \[)] 'jump-char-backward)
 
 (defun set-input-method-english ()
   (interactive)
