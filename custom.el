@@ -37,7 +37,8 @@
  '(rw-hunspell-use-rw-ispell t)
  '(safe-local-variable-values
    (quote
-    ((TeX-auto-save . t)
+    ((TeX-engine . pdftex)
+     (TeX-auto-save . t)
      (TeX-parse-self . t)
      (major-mode . rst-mode)
      (eval ispell-change-dictionary "ru_RU_hunspell")
